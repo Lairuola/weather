@@ -4,6 +4,8 @@ import { AppShell } from './components/layout/AppShell'
 import { Loader } from './components/ui/Loader'
 import { ErrorBanner } from './components/ui/ErrorBanner'
 import { SearchBar } from './components/weather/SearchBar'
+import type { Weather } from './api/types'
+import { provider } from './api/provider'
 import { WeatherCard } from './components/weather/WeatherCard'
 import { ForecastStrip } from './components/weather/ForecastStrip'
 import { HourlyForecast } from './components/weather/HourlyForecast'
@@ -21,6 +23,9 @@ export default function App() {
   const hourly = useWeatherStore((s) => s.hourly)
   const airQuality = useWeatherStore((s) => s.airQuality)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const [compareMode, setCompareMode] = useState(false)
+  const [compareWeather, setCompareWeather] = useState<Weather | null>(null)
+  const [compareLoading, setCompareLoading] = useState(false)
 
   const dayHourly = useMemo(() => {
     if (!selectedDay || !hourly.data) return null
@@ -52,15 +57,47 @@ export default function App() {
     if (city) fetchWeather(city, true)
   }
 
+  const handleCompare = async (city: string) => {
+    setCompareLoading(true)
+    try {
+      const weather = await provider.getCurrentWeather(city)
+      setCompareWeather(weather)
+    } catch {
+      setCompareWeather(null)
+    } finally {
+      setCompareLoading(false)
+    }
+  }
+
   const handleClear = () => {
     useWeatherStore.getState().resetToIdle()
+    setCompareMode(false)
+    setCompareWeather(null)
   }
 
   return (
     <AppShell weather={current.status === 'success' ? current.data : null}>
-      <SearchBar onSearch={handleSearch} disabled={current.status === 'loading'} />
+      <SearchBar
+        onSearch={compareMode ? handleCompare : handleSearch}
+        disabled={current.status === 'loading' || compareLoading}
+        placeholder={compareMode ? '输入对比城市…' : undefined}
+      />
 
-      {/* Toolbar: Locate + Recent searches + Clear */}
+      {/* Toolbar: Locate + Compare + Recent searches + Clear */}
+      {current.status === 'success' && (
+        <div className="px-4 pt-2">
+          <button
+            onClick={() => { setCompareMode(!compareMode); setCompareWeather(null) }}
+            className={`rounded-xl px-3 py-1 text-xs transition-all ${
+              compareMode
+                ? 'bg-white/20 text-white'
+                : 'text-white/40 hover:text-white/70'
+            }`}
+          >
+            {compareMode ? '对比中…' : '⇆ 对比'}
+          </button>
+        </div>
+      )}
       <div className="flex items-center gap-2 px-4 pt-3">
         <button
           onClick={locate}
@@ -117,6 +154,12 @@ export default function App() {
         <>
           <WeatherCard weather={current.data} onRefresh={handleRefresh} onClose={handleClear} />
           {airQuality && <AirQualityCard aqi={airQuality} />}
+          {compareWeather && (
+            <div className="mt-3">
+              <div className="mx-4 mb-1 text-xs text-white/40">对比城市</div>
+              <WeatherCard weather={compareWeather} />
+            </div>
+          )}
           {forecast.status === 'success' && forecast.data && (
             <ForecastStrip
               forecast={forecast.data}

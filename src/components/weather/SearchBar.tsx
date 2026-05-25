@@ -5,9 +5,10 @@ import { useWeatherStore } from '../../store/weatherStore'
 interface SearchBarProps {
   onSearch: (city: string) => void
   disabled: boolean
+  placeholder?: string
 }
 
-export function SearchBar({ onSearch, disabled }: SearchBarProps) {
+export function SearchBar({ onSearch, disabled, placeholder }: SearchBarProps) {
   const [value, setValue] = useState('')
   const [open, setOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -78,7 +79,7 @@ export function SearchBar({ onSearch, disabled }: SearchBarProps) {
           value={value}
           onChange={(e) => { setValue(e.target.value); setOpen(true) }}
           onFocus={() => query && setOpen(true)}
-          placeholder="输入城市名称…  按 / 键快速搜索"
+          placeholder={placeholder ?? '输入城市名称…  按 / 键快速搜索'}
           disabled={disabled}
           aria-label="城市名称"
           autoComplete="off"
