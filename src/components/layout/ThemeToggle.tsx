@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useWeatherStore } from '../../store/weatherStore'
 
 const themes = ['light', 'dark', 'system'] as const
 const icons: Record<string, string> = { light: '☀️', dark: '🌙', system: '💻' }
+const labels: Record<string, string> = { light: '浅色', dark: '深色', system: '自动' }
 
 function applyTheme(theme: 'light' | 'dark' | 'system') {
   const root = document.documentElement
@@ -11,7 +13,6 @@ function applyTheme(theme: 'light' | 'dark' | 'system') {
   } else if (theme === 'light') {
     root.classList.remove('dark')
   } else {
-    // system: 跟随 OS
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     root.classList.toggle('dark', mq.matches)
   }
@@ -38,12 +39,22 @@ export function ThemeToggle() {
   }
 
   return (
-    <button
+    <motion.button
       onClick={cycle}
+      whileTap={{ scale: 0.9 }}
       aria-label={`主题：${theme}`}
-      className="rounded-xl px-3 py-1.5 text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all"
+      className="rounded-xl px-3 py-1.5 text-sm text-white/60 hover:text-white hover:bg-white/10 transition-colors"
     >
-      {icons[theme]} {theme === 'system' ? '自动' : theme === 'dark' ? '深色' : '浅色'}
-    </button>
+      <motion.span
+        key={theme}
+        initial={{ rotate: -90, opacity: 0 }}
+        animate={{ rotate: 0, opacity: 1 }}
+        transition={{ duration: 0.25 }}
+        className="inline-block"
+      >
+        {icons[theme]}
+      </motion.span>{' '}
+      {labels[theme]}
+    </motion.button>
   )
 }

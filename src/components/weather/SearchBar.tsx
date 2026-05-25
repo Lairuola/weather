@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { motion } from 'framer-motion'
 
 interface SearchBarProps {
   onSearch: (city: string) => void
@@ -16,7 +17,13 @@ export function SearchBar({ onSearch, disabled }: SearchBarProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="px-4 pt-6">
+    <motion.form
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      onSubmit={handleSubmit}
+      className="px-4 pt-6"
+    >
       <div className="relative">
         <input
           type="text"
@@ -27,7 +34,9 @@ export function SearchBar({ onSearch, disabled }: SearchBarProps) {
           aria-label="城市名称"
           className="w-full rounded-2xl bg-white/20 dark:bg-slate-800/30 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 px-4 py-3 pr-12 text-lg text-white placeholder:text-white/50 outline-none transition-all focus:ring-2 focus:ring-white/40 disabled:opacity-50"
         />
-        <button
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           type="submit"
           disabled={disabled || !value.trim()}
           aria-label="搜索"
@@ -36,8 +45,8 @@ export function SearchBar({ onSearch, disabled }: SearchBarProps) {
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-        </button>
+        </motion.button>
       </div>
-    </form>
+    </motion.form>
   )
 }

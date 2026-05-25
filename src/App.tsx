@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { AppShell } from './components/layout/AppShell'
 import { Loader } from './components/ui/Loader'
 import { ErrorBanner } from './components/ui/ErrorBanner'
@@ -79,10 +80,20 @@ export default function App() {
 
       {/* Idle state */}
       {current.status === 'idle' && (
-        <div className="flex flex-col items-center justify-center py-20 text-white/40">
-          <span className="text-6xl">🌤️</span>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center justify-center py-20 text-white/40"
+        >
+          <motion.span
+            className="text-6xl"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            🌤️
+          </motion.span>
           <p className="mt-4 text-sm">输入城市名称或点击定位查看天气</p>
-        </div>
+        </motion.div>
       )}
 
       {/* Favorites + Recent Searches */}
