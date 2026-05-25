@@ -6,9 +6,10 @@ import { formatTemp } from '../../utils/format'
 
 interface WeatherCardProps {
   weather: Weather
+  onClose?: () => void
 }
 
-export function WeatherCard({ weather }: WeatherCardProps) {
+export function WeatherCard({ weather, onClose }: WeatherCardProps) {
   const unit = useWeatherStore((s) => s.unit)
   const meta = WEATHER_CODE_MAP[weather.iconCode]
   const gradient = meta?.gradient ?? 'from-gray-400 to-gray-500'
@@ -25,17 +26,18 @@ export function WeatherCard({ weather }: WeatherCardProps) {
     >
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-lg font-medium">{weather.cityName}</h2>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg font-medium truncate">{weather.cityName}</h2>
           <p className="text-sm text-white/70">{weather.country}</p>
         </div>
-        <motion.button
-          whileTap={{ scale: 0.85 }}
-          whileHover={{ scale: 1.15 }}
-          onClick={() => isFavorite ? removeFavorite(weather.cityName) : addFavorite(weather.cityName)}
-          aria-label={isFavorite ? '取消收藏' : '收藏'}
-          className="rounded-xl p-2 text-2xl"
-        >
+        <div className="flex items-center gap-0.5">
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            whileHover={{ scale: 1.15 }}
+            onClick={() => isFavorite ? removeFavorite(weather.cityName) : addFavorite(weather.cityName)}
+            aria-label={isFavorite ? '取消收藏' : '收藏'}
+            className="rounded-xl p-2 text-2xl"
+          >
           <motion.span
             key={isFavorite ? 'filled' : 'empty'}
             initial={{ scale: 0.5, opacity: 0 }}
@@ -45,6 +47,17 @@ export function WeatherCard({ weather }: WeatherCardProps) {
             {isFavorite ? '★' : '☆'}
           </motion.span>
         </motion.button>
+          {onClose && (
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={onClose}
+              aria-label="关闭"
+              className="rounded-xl p-2 text-lg text-white/40 hover:text-white/80 transition-colors"
+            >
+              ✕
+            </motion.button>
+          )}
+        </div>
       </div>
 
       {/* Main temp */}

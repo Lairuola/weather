@@ -83,16 +83,6 @@ export default function App() {
             ))}
           </div>
         )}
-        {(current.status === 'success' || current.status === 'error') && (
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onClick={handleClear}
-            className="ml-auto shrink-0 rounded-xl bg-white/10 px-2.5 py-1.5 text-xs text-white/50 hover:text-white hover:bg-white/20 transition-colors"
-          >
-            ✕ 清除
-          </motion.button>
-        )}
       </div>
 
       {/* Loading */}
@@ -108,7 +98,7 @@ export default function App() {
       {/* Success */}
       {current.status === 'success' && current.data && (
         <>
-          <WeatherCard weather={current.data} />
+          <WeatherCard weather={current.data} onClose={handleClear} />
           {forecast.status === 'success' && forecast.data && (
             <ForecastStrip forecast={forecast.data} />
           )}
