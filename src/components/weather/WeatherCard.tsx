@@ -7,9 +7,10 @@ import { formatTemp, formatWindDir } from '../../utils/format'
 interface WeatherCardProps {
   weather: Weather
   onClose?: () => void
+  onRefresh?: () => void
 }
 
-export function WeatherCard({ weather, onClose }: WeatherCardProps) {
+export function WeatherCard({ weather, onClose, onRefresh }: WeatherCardProps) {
   const unit = useWeatherStore((s) => s.unit)
   const meta = WEATHER_CODE_MAP[weather.iconCode]
   const gradient = meta?.gradient ?? 'from-gray-400 to-gray-500'
@@ -47,6 +48,16 @@ export function WeatherCard({ weather, onClose }: WeatherCardProps) {
             {isFavorite ? '★' : '☆'}
           </motion.span>
         </motion.button>
+          {onRefresh && (
+            <motion.button
+              whileTap={{ scale: 0.85, rotate: 180 }}
+              onClick={onRefresh}
+              aria-label="刷新"
+              className="rounded-xl p-2 text-lg text-white/40 hover:text-white/80 transition-colors"
+            >
+              ↻
+            </motion.button>
+          )}
           {onClose && (
             <motion.button
               whileTap={{ scale: 0.85 }}

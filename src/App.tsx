@@ -39,6 +39,11 @@ export default function App() {
     fetchWeather(city, true) // 即时，跳过 debounce
   }
 
+  const handleRefresh = () => {
+    const city = useWeatherStore.getState().lastSearchedCity
+    if (city) fetchWeather(city, true)
+  }
+
   const handleClear = () => {
     useWeatherStore.getState().resetToIdle()
   }
@@ -102,7 +107,7 @@ export default function App() {
       {/* Success */}
       {current.status === 'success' && current.data && (
         <>
-          <WeatherCard weather={current.data} onClose={handleClear} />
+          <WeatherCard weather={current.data} onRefresh={handleRefresh} onClose={handleClear} />
           {forecast.status === 'success' && forecast.data && (
             <ForecastStrip forecast={forecast.data} />
           )}
