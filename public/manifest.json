@@ -1,0 +1,12 @@
+{
+  "name": "天气查询",
+  "short_name": "天气",
+  "description": "现代化天气查询应用",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0369a1",
+  "theme_color": "#0369a1",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

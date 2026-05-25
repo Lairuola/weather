@@ -10,6 +10,16 @@ interface WeatherCardProps {
   onRefresh?: () => void
 }
 
+async function handleShare(weather: Weather) {
+  const text = `${weather.cityName} ${weather.temperature}°C ${weather.description}，体感 ${weather.feelsLike}°C，湿度 ${weather.humidity}%，风速 ${weather.windSpeed} m/s`
+  if (navigator.share) {
+    await navigator.share({ title: `${weather.cityName} 天气`, text, url: window.location.href })
+  } else {
+    await navigator.clipboard.writeText(text)
+    // brief visual feedback would be nice but keep it simple
+  }
+}
+
 export function WeatherCard({ weather, onClose, onRefresh }: WeatherCardProps) {
   const unit = useWeatherStore((s) => s.unit)
   const windUnit = useWeatherStore((s) => s.windUnit)
@@ -49,6 +59,14 @@ export function WeatherCard({ weather, onClose, onRefresh }: WeatherCardProps) {
             {isFavorite ? '★' : '☆'}
           </motion.span>
         </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={() => handleShare(weather)}
+            aria-label="分享"
+            className="rounded-xl p-2 text-lg text-white/40 hover:text-white/80 transition-colors"
+          >
+            ↗
+          </motion.button>
           {onRefresh && (
             <motion.button
               whileTap={{ scale: 0.85, rotate: 180 }}
