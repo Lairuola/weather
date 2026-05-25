@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ForecastDay, HourlyForecast, Weather } from '../api/types'
+import type { AirQuality, ForecastDay, HourlyForecast, Weather } from '../api/types'
 
 interface WeatherCache {
   fetchedAt: number
@@ -34,6 +34,7 @@ interface AppStore {
   current: WeatherStatus
   forecast: ForecastStatus
   hourly: { data: HourlyForecast[] | null }
+  airQuality: AirQuality | null
   weatherCache: WeatherCache | null
   favorites: string[]
   recentSearches: string[]
@@ -50,6 +51,7 @@ interface AppStore {
   setForecastSuccess: (data: ForecastDay[]) => void
   setForecastError: (error: string) => void
   setHourly: (data: HourlyForecast[]) => void
+  setAirQuality: (aqi: AirQuality | null) => void
   saveToCache: (current: Weather, forecast: ForecastDay[], hourly: HourlyForecast[]) => void
   restoreFromCache: () => boolean
   resetToIdle: () => void
@@ -69,6 +71,7 @@ export const useWeatherStore = create<AppStore>()(
       current: { status: 'idle', data: null, error: null },
       forecast: { status: 'idle', data: null, error: null },
       hourly: { data: null },
+      airQuality: null,
       weatherCache: null,
       favorites: [],
       recentSearches: [],
@@ -85,6 +88,7 @@ export const useWeatherStore = create<AppStore>()(
       setForecastSuccess: (data) => set({ forecast: { status: 'success', data, error: null } }),
       setForecastError: (error) => set({ forecast: { status: 'error', data: null, error } }),
       setHourly: (data) => set({ hourly: { data } }),
+      setAirQuality: (airQuality) => set({ airQuality }),
       saveToCache: (current, forecast, hourly) => set({
         weatherCache: { fetchedAt: Date.now(), current, forecast, hourly },
       }),
@@ -102,6 +106,7 @@ export const useWeatherStore = create<AppStore>()(
         current: { status: 'idle' as const, data: null, error: null },
         forecast: { status: 'idle' as const, data: null, error: null },
         hourly: { data: null },
+        airQuality: null,
       }),
       setGeoDenied: (denied) => set({ geoDenied: denied }),
 

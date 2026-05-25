@@ -93,6 +93,8 @@ function normalizeCurrent(geo: GeocodingResult, current: any): Weather {
   return {
     cityName: geo.name,
     country: geo.country,
+    lat: geo.latitude,
+    lon: geo.longitude,
     temperature: Math.round(current.temperature_2m),
     feelsLike: Math.round(current.apparent_temperature),
     description: wmoToDescription(current.weather_code),
@@ -188,5 +190,23 @@ export const openmeteoProvider: WeatherProvider = {
     if (!res.ok) throw new Error('天气服务不可用')
     const data = await res.json()
     return normalizeHourly(data.hourly)
+  },
+
+  async getAirQuality(lat: number, lon: number) {
+    try {
+      const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,ozone&timezone=auto`
+      const res = await fetch(url)
+      if (!res.ok) return null
+      const data = await res.json()
+      const c = data.current
+      return {
+        usAqi: c.us_aqi ?? 0,
+        pm25: c.pm2_5 ?? 0,
+        pm10: c.pm10 ?? 0,
+        ozone: c.ozone ?? 0,
+      }
+    } catch {
+      return null
+    }
   },
 }

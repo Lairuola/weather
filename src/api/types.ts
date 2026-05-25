@@ -37,6 +37,8 @@ export interface Weather {
   windSpeed: number         // m/s
   windDirection?: number    // 风向角度 0-360
   pressure?: number         // 气压 hPa
+  lat?: number              // 纬度（用于 AQI 查询）
+  lon?: number              // 经度
   sunrise?: string          // 日出时间 ISO
   sunset?: string           // 日落时间 ISO
 }
@@ -51,6 +53,23 @@ export interface ForecastDay {
   humidity: number
   sunrise?: string
   sunset?: string
+}
+
+// 空气质量
+export interface AirQuality {
+  usAqi: number
+  pm25: number
+  pm10: number
+  ozone: number
+}
+
+export function aqiLabel(aqi: number): { text: string; color: string } {
+  if (aqi <= 50) return { text: '优', color: 'text-green-300' }
+  if (aqi <= 100) return { text: '良', color: 'text-yellow-300' }
+  if (aqi <= 150) return { text: '轻度污染', color: 'text-orange-400' }
+  if (aqi <= 200) return { text: '中度污染', color: 'text-red-400' }
+  if (aqi <= 300) return { text: '重度污染', color: 'text-purple-400' }
+  return { text: '严重污染', color: 'text-rose-500' }
 }
 
 // 逐小时预报
@@ -71,4 +90,5 @@ export interface WeatherProvider {
   getForecastByCoords(lat: number, lon: number): Promise<ForecastDay[]>
   getHourlyForecast(city: string): Promise<HourlyForecast[]>
   getHourlyForecastByCoords(lat: number, lon: number): Promise<HourlyForecast[]>
+  getAirQuality(lat: number, lon: number): Promise<AirQuality | null>
 }

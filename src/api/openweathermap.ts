@@ -131,4 +131,8 @@ export const openweathermapProvider: WeatherProvider = {
       humidity: item.main.humidity,
     }))
   },
+
+  async getAirQuality() {
+    return null // OWM air pollution requires separate API, skip for now
+  },
 }

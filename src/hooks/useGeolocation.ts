@@ -50,6 +50,9 @@ export function useGeolocation() {
           s.setHourly(hourly)
           s.saveToCache(weather, forecast, hourly)
           s.addRecentSearch(weather.cityName)
+          provider.getAirQuality(pos.coords.latitude, pos.coords.longitude).then((aqi) => {
+            if (aqi) useWeatherStore.getState().setAirQuality(aqi)
+          })
         } catch (err) {
           const s2 = useWeatherStore.getState()
           const message = err instanceof Error ? err.message : '未知错误'

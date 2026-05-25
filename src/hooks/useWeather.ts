@@ -29,6 +29,12 @@ export function useWeather() {
       s.setHourly(hourly as HourlyForecast[])
       s.saveToCache(weather, forecast, hourly as HourlyForecast[])
       s.addRecentSearch(trimmed)
+      // AQI（异步，不影响主流程）
+      if (weather.lat != null && weather.lon != null) {
+        provider.getAirQuality(weather.lat, weather.lon).then((aqi) => {
+          if (aqi) useWeatherStore.getState().setAirQuality(aqi)
+        })
+      }
     } catch (err) {
       if (controller.signal.aborted) return
       const message = err instanceof Error ? err.message : '未知错误'

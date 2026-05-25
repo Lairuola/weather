@@ -7,6 +7,7 @@ import { SearchBar } from './components/weather/SearchBar'
 import { WeatherCard } from './components/weather/WeatherCard'
 import { ForecastStrip } from './components/weather/ForecastStrip'
 import { HourlyForecast } from './components/weather/HourlyForecast'
+import { AirQualityCard } from './components/weather/AirQualityCard'
 import { FavoritesList } from './components/weather/FavoritesList'
 import { useWeather } from './hooks/useWeather'
 import { useGeolocation } from './hooks/useGeolocation'
@@ -18,6 +19,7 @@ export default function App() {
   const lastSearchedCity = useWeatherStore((s) => s.lastSearchedCity)
   const recentSearches = useWeatherStore((s) => s.recentSearches)
   const hourly = useWeatherStore((s) => s.hourly)
+  const airQuality = useWeatherStore((s) => s.airQuality)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
   const dayHourly = useMemo(() => {
@@ -114,6 +116,7 @@ export default function App() {
       {current.status === 'success' && current.data && (
         <>
           <WeatherCard weather={current.data} onRefresh={handleRefresh} onClose={handleClear} />
+          {airQuality && <AirQualityCard aqi={airQuality} />}
           {forecast.status === 'success' && forecast.data && (
             <ForecastStrip
               forecast={forecast.data}

@@ -8,6 +8,7 @@ vi.mock('../api/provider', () => ({
     getCurrentWeatherByCoords: vi.fn(),
     getForecastByCoords: vi.fn(),
     getHourlyForecastByCoords: vi.fn().mockResolvedValue([]),
+    getAirQuality: vi.fn().mockResolvedValue(null),
   },
 }))
 
@@ -54,6 +55,7 @@ describe('useGeolocation', () => {
     getCurrentWeatherByCoords: ReturnType<typeof vi.fn>
     getForecastByCoords: ReturnType<typeof vi.fn>
     getHourlyForecastByCoords: ReturnType<typeof vi.fn>
+    getAirQuality: ReturnType<typeof vi.fn>
   }
 
   it('fetches weather on geolocation success', async () => {
