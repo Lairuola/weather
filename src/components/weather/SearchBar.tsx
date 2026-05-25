@@ -43,18 +43,12 @@ export function SearchBar({ onSearch, disabled }: SearchBarProps) {
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="输入城市名称..."
+          placeholder="输入城市名称…  按 / 键快速搜索"
           disabled={disabled}
           aria-label="城市名称"
           className="w-full rounded-2xl bg-white/20 dark:bg-slate-800/30 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 px-4 py-3 pr-20 text-lg text-white placeholder:text-white/50 outline-none transition-all focus:ring-2 focus:ring-white/40 disabled:opacity-50"
         />
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-          {/* `/` shortcut hint */}
-          {!value && (
-            <kbd className="hidden sm:inline-flex items-center rounded-md border border-white/20 px-1.5 py-0.5 text-xs text-white/30">
-              /
-            </kbd>
-          )}
+        <div className="absolute right-2 top-1/2 -translate-y-1/2">
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
