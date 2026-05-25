@@ -119,6 +119,22 @@ describe('useWeather', () => {
     expect(useWeatherStore.getState().current.status).toBe('loading')
   })
 
+  it('fetches immediately when immediate=true (no debounce)', async () => {
+    mockProvider.getCurrentWeather.mockResolvedValueOnce(mockWeather)
+    mockProvider.getForecast.mockResolvedValueOnce(mockForecast)
+
+    const { result } = renderHook(() => useWeather())
+
+    act(() => { result.current.fetchWeather('北京', true) })
+
+    // No need to advance timers — fetch fires instantly
+    await vi.waitFor(() => {
+      expect(useWeatherStore.getState().current.status).toBe('success')
+    })
+
+    expect(useWeatherStore.getState().current.data?.cityName).toBe('北京')
+  })
+
   it('aborts previous request on new search', async () => {
     mockProvider.getCurrentWeather.mockResolvedValue(mockWeather)
     mockProvider.getForecast.mockResolvedValue(mockForecast)

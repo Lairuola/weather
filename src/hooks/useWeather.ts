@@ -6,7 +6,6 @@ export function useWeather() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
-  // 组件卸载时取消未完成的请求
   useEffect(() => {
     return () => {
       abortRef.current?.abort()
@@ -14,49 +13,55 @@ export function useWeather() {
     }
   }, [])
 
-  const fetchWeather = useCallback((city: string) => {
+  const doFetch = useCallback(async (trimmed: string, controller: AbortController) => {
+    try {
+      const signal = controller.signal
+      const [weather, forecast] = await Promise.all([
+        provider.getCurrentWeather(trimmed),
+        provider.getForecast(trimmed),
+      ])
+      if (signal.aborted) return
+      const s = useWeatherStore.getState()
+      s.setCurrentSuccess(weather)
+      s.setForecastSuccess(forecast)
+      s.addRecentSearch(trimmed)
+    } catch (err) {
+      if (controller.signal.aborted) return
+      const message = err instanceof Error ? err.message : '未知错误'
+      const s2 = useWeatherStore.getState()
+      s2.setCurrentError(message)
+      s2.setForecastError(message)
+    }
+  }, [])
+
+  const fetchWeather = useCallback((city: string, immediate = false) => {
     const trimmed = city.trim()
     if (!trimmed) return
 
-    // 立即显示 loading 状态——用户操作即时反馈
     const store = useWeatherStore.getState()
     store.setCurrentLoading()
     store.setForecastLoading()
 
-    // 400ms debounce——只延迟 API 调用，不延迟 loading
+    // Cancel previous
+    abortRef.current?.abort()
     if (debounceRef.current != null) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(async () => {
-      // 取消上一次请求
-      abortRef.current?.abort()
+
+    if (immediate) {
       const controller = new AbortController()
       abortRef.current = controller
-
-      try {
-        const signal = controller.signal
-        const [weather, forecast] = await Promise.all([
-          provider.getCurrentWeather(trimmed),
-          provider.getForecast(trimmed),
-        ])
-
-        if (signal.aborted) return
-
-        const s = useWeatherStore.getState()
-        s.setCurrentSuccess(weather)
-        s.setForecastSuccess(forecast)
-        s.addRecentSearch(trimmed)
-      } catch (err) {
-        if (controller.signal.aborted) return
-        const message = err instanceof Error ? err.message : '未知错误'
-        const s2 = useWeatherStore.getState()
-        s2.setCurrentError(message)
-        s2.setForecastError(message)
-      }
-    }, 400)
-  }, [])
+      doFetch(trimmed, controller)
+    } else {
+      debounceRef.current = setTimeout(() => {
+        const controller = new AbortController()
+        abortRef.current = controller
+        doFetch(trimmed, controller)
+      }, 400)
+    }
+  }, [doFetch])
 
   const retry = useCallback(() => {
     const city = useWeatherStore.getState().lastSearchedCity
-    if (city) fetchWeather(city)
+    if (city) fetchWeather(city, true)
   }, [fetchWeather])
 
   return { fetchWeather, retry }

@@ -77,6 +77,19 @@ describe('weatherStore', () => {
     })
   })
 
+  describe('resetToIdle', () => {
+    it('resets both current and forecast to idle', () => {
+      useWeatherStore.getState().setCurrentSuccess({
+        cityName: '北京', country: 'CN', temperature: 25, feelsLike: 24,
+        description: '晴', iconCode: 0 as Weather['iconCode'], humidity: 55, windSpeed: 3.2,
+      })
+      useWeatherStore.getState().resetToIdle()
+      expect(useWeatherStore.getState().current.status).toBe('idle')
+      expect(useWeatherStore.getState().forecast.status).toBe('idle')
+      expect(useWeatherStore.getState().current.data).toBeNull()
+    })
+  })
+
   describe('preferences', () => {
     it('toggles unit', () => {
       useWeatherStore.getState().setUnit('fahrenheit')

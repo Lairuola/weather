@@ -20,7 +20,6 @@ export default function App() {
   const { fetchWeather, retry } = useWeather()
   const { locate } = useGeolocation()
 
-  // 自动恢复上次搜索
   useEffect(() => {
     if (lastSearchedCity) {
       fetchWeather(lastSearchedCity)
@@ -31,15 +30,19 @@ export default function App() {
     fetchWeather(city)
   }
 
-  const handleSelectFavorite = (city: string) => {
-    fetchWeather(city)
+  const handleQuickSelect = (city: string) => {
+    fetchWeather(city, true) // 即时，跳过 debounce
+  }
+
+  const handleClear = () => {
+    useWeatherStore.getState().resetToIdle()
   }
 
   return (
     <AppShell>
       <SearchBar onSearch={handleSearch} disabled={current.status === 'loading'} />
 
-      {/* Geolocation button + Recent searches */}
+      {/* Toolbar: Locate + Recent searches + Clear */}
       <div className="flex items-center gap-2 px-4 pt-3">
         <button
           onClick={locate}
@@ -53,7 +56,7 @@ export default function App() {
           定位
         </button>
         {recentSearches.length > 0 && (
-          <div className="flex gap-1.5 overflow-x-auto">
+          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {recentSearches.map((city) => (
               <motion.button
                 key={city}
@@ -61,7 +64,7 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handleSearch(city)}
+                onClick={() => handleQuickSelect(city)}
                 disabled={current.status === 'loading'}
                 className="shrink-0 rounded-lg bg-white/10 px-2.5 py-1 text-xs text-white/60 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30"
               >
@@ -69,6 +72,16 @@ export default function App() {
               </motion.button>
             ))}
           </div>
+        )}
+        {(current.status === 'success' || current.status === 'error') && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={handleClear}
+            className="ml-auto shrink-0 rounded-xl bg-white/10 px-2.5 py-1.5 text-xs text-white/50 hover:text-white hover:bg-white/20 transition-colors"
+          >
+            ✕ 清除
+          </motion.button>
         )}
       </div>
 
@@ -115,8 +128,8 @@ export default function App() {
         </motion.div>
       )}
 
-      {/* Favorites + Recent Searches */}
-      <FavoritesList onSelect={handleSelectFavorite} />
+      {/* Favorites */}
+      <FavoritesList onSelect={handleQuickSelect} />
     </AppShell>
   )
 }

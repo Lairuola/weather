@@ -30,6 +30,7 @@ interface AppStore {
   setForecastLoading: () => void
   setForecastSuccess: (data: ForecastDay[]) => void
   setForecastError: (error: string) => void
+  resetToIdle: () => void
   setGeoDenied: (denied: boolean) => void
   addFavorite: (city: string) => void
   removeFavorite: (city: string) => void
@@ -56,6 +57,10 @@ export const useWeatherStore = create<AppStore>()(
       setForecastLoading: () => set({ forecast: { status: 'loading', data: null, error: null } }),
       setForecastSuccess: (data) => set({ forecast: { status: 'success', data, error: null } }),
       setForecastError: (error) => set({ forecast: { status: 'error', data: null, error } }),
+      resetToIdle: () => set({
+        current: { status: 'idle' as const, data: null, error: null },
+        forecast: { status: 'idle' as const, data: null, error: null },
+      }),
       setGeoDenied: (denied) => set({ geoDenied: denied }),
 
       addFavorite: (city) => set((s) => ({
