@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import type { ForecastDay } from '../../api/types'
 import { WEATHER_CODE_MAP } from '../../api/types'
 import { useWeatherStore } from '../../store/weatherStore'
-import { formatTemp } from '../../utils/format'
+import { formatTemp, formatTime } from '../../utils/format'
 
 interface ForecastStripProps {
   forecast: ForecastDay[]
@@ -50,6 +50,12 @@ export function ForecastStrip({ forecast }: ForecastStripProps) {
               <span className="mt-1 text-2xl">{meta?.emoji ?? '🌤️'}</span>
               <span className="mt-1 text-sm font-medium text-white">{formatTemp(day.tempHigh, unit)}</span>
               <span className="text-xs text-white/50">{formatTemp(day.tempLow, unit)}</span>
+              {day.sunrise && day.sunset && (
+                <div className="mt-1 flex gap-1 text-[10px] text-white/35">
+                  <span>↑{formatTime(day.sunrise)}</span>
+                  <span>↓{formatTime(day.sunset)}</span>
+                </div>
+              )}
             </motion.div>
           )
         })}

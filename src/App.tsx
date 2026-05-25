@@ -120,16 +120,23 @@ export default function App() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex flex-col items-center justify-center py-20 text-white/40"
+          className="flex flex-col items-center justify-center py-20"
         >
-          <motion.span
+          <motion.button
+            onClick={locate}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             className="text-6xl"
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            aria-label="点击定位"
           >
-            🌤️
-          </motion.span>
-          <p className="mt-4 text-sm">输入城市名称或点击定位查看天气</p>
+            <motion.span
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              🌤️
+            </motion.span>
+          </motion.button>
+          <p className="mt-4 text-sm text-white/40">输入城市名称或点击定位查看天气</p>
         </motion.div>
       )}
 
