@@ -15,6 +15,7 @@ export default function App() {
   const current = useWeatherStore((s) => s.current)
   const forecast = useWeatherStore((s) => s.forecast)
   const lastSearchedCity = useWeatherStore((s) => s.lastSearchedCity)
+  const recentSearches = useWeatherStore((s) => s.recentSearches)
 
   const { fetchWeather, retry } = useWeather()
   const { locate } = useGeolocation()
@@ -38,12 +39,12 @@ export default function App() {
     <AppShell>
       <SearchBar onSearch={handleSearch} disabled={current.status === 'loading'} />
 
-      {/* Geolocation button */}
-      <div className="px-4 pt-3">
+      {/* Geolocation button + Recent searches */}
+      <div className="flex items-center gap-2 px-4 pt-3">
         <button
           onClick={locate}
           disabled={current.status === 'loading'}
-          className="flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-sm text-white/70 hover:text-white hover:bg-white/20 transition-all disabled:opacity-30"
+          className="flex shrink-0 items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-sm text-white/70 hover:text-white hover:bg-white/20 transition-all disabled:opacity-30"
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -51,6 +52,24 @@ export default function App() {
           </svg>
           定位
         </button>
+        {recentSearches.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto">
+            {recentSearches.map((city) => (
+              <motion.button
+                key={city}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleSearch(city)}
+                disabled={current.status === 'loading'}
+                className="shrink-0 rounded-lg bg-white/10 px-2.5 py-1 text-xs text-white/60 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30"
+              >
+                {city}
+              </motion.button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Loading */}
