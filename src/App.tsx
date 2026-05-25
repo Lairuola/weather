@@ -40,7 +40,7 @@ export default function App() {
   }
 
   return (
-    <AppShell>
+    <AppShell weather={current.status === 'success' ? current.data : null}>
       <SearchBar onSearch={handleSearch} disabled={current.status === 'loading'} />
 
       {/* Toolbar: Locate + Recent searches + Clear */}
