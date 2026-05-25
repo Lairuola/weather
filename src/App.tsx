@@ -6,6 +6,7 @@ import { ErrorBanner } from './components/ui/ErrorBanner'
 import { SearchBar } from './components/weather/SearchBar'
 import { WeatherCard } from './components/weather/WeatherCard'
 import { ForecastStrip } from './components/weather/ForecastStrip'
+import { HourlyForecast } from './components/weather/HourlyForecast'
 import { FavoritesList } from './components/weather/FavoritesList'
 import { useWeather } from './hooks/useWeather'
 import { useGeolocation } from './hooks/useGeolocation'
@@ -16,6 +17,7 @@ export default function App() {
   const forecast = useWeatherStore((s) => s.forecast)
   const lastSearchedCity = useWeatherStore((s) => s.lastSearchedCity)
   const recentSearches = useWeatherStore((s) => s.recentSearches)
+  const hourly = useWeatherStore((s) => s.hourly)
 
   const removeRecentSearch = useWeatherStore((s) => s.removeRecentSearch)
   const { fetchWeather, retry } = useWeather()
@@ -101,6 +103,9 @@ export default function App() {
           <WeatherCard weather={current.data} onClose={handleClear} />
           {forecast.status === 'success' && forecast.data && (
             <ForecastStrip forecast={forecast.data} />
+          )}
+          {hourly.data && hourly.data.length > 0 && (
+            <HourlyForecast hourly={hourly.data} />
           )}
           {forecast.status === 'error' && forecast.error && (
             <div className="px-4 pt-2">

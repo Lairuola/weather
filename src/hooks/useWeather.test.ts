@@ -6,6 +6,7 @@ vi.mock('../api/provider', () => ({
   provider: {
     getCurrentWeather: vi.fn(),
     getForecast: vi.fn(),
+    getHourlyForecast: vi.fn().mockResolvedValue([]),
   },
 }))
 
@@ -44,6 +45,7 @@ describe('useWeather', () => {
   const mockProvider = provider as unknown as {
     getCurrentWeather: ReturnType<typeof vi.fn>
     getForecast: ReturnType<typeof vi.fn>
+    getHourlyForecast: ReturnType<typeof vi.fn>
   }
 
   it('transitions through loading → success', async () => {

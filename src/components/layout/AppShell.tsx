@@ -37,11 +37,11 @@ export function AppShell({ children, weather }: AppShellProps) {
 
   return (
     <div className="relative min-h-svh bg-gradient-to-b from-sky-700 via-sky-500 to-sky-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 transition-colors">
-      <header className="flex items-center gap-3 px-4 pt-4 pb-1">
+      <header className="flex flex-col gap-1 px-4 pt-4 pb-1 sm:flex-row sm:items-center sm:gap-3">
         {/* Left: greeting + date + time */}
         <div className="flex items-baseline gap-2 min-w-0 flex-1">
-          <h1 className="text-lg font-medium text-white truncate">{greeting}</h1>
-          <span className="text-sm text-white/50 shrink-0 tabular-nums">
+          <h1 className="text-base font-medium text-white truncate sm:text-lg">{greeting}</h1>
+          <span className="text-xs text-white/50 shrink-0 tabular-nums sm:text-sm">
             {dateStr} {weekStr} {timeStr}
           </span>
         </div>

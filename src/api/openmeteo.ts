@@ -97,6 +97,7 @@ function normalizeCurrent(geo: GeocodingResult, current: any): Weather {
     iconCode: wmoToWeatherCode(current.weather_code),
     humidity: current.relative_humidity_2m ?? 0,
     windSpeed: Math.round((current.wind_speed_10m ?? 0) * 10) / 10,
+    windDirection: current.wind_direction_10m ?? undefined,
   }
 }
 
@@ -107,16 +108,32 @@ function normalizeForecast(daily: any): ForecastDay[] {
     tempLow: Math.round(daily.temperature_2m_min[i]),
     description: wmoToDescription(daily.weather_code[i]),
     iconCode: wmoToWeatherCode(daily.weather_code[i]),
-    humidity: 0, // Open-Meteo daily 不返回湿度
+    humidity: 0,
+    sunrise: daily.sunrise?.[i] ?? undefined,
+    sunset: daily.sunset?.[i] ?? undefined,
   }))
 }
+
+function normalizeHourly(hourly: any) {
+  return hourly.time.map((t: string, i: number) => ({
+    time: t,
+    temperature: Math.round(hourly.temperature_2m[i]),
+    iconCode: wmoToWeatherCode(hourly.weather_code[i]),
+    precipitation: hourly.precipitation[i] ?? 0,
+    humidity: hourly.relative_humidity_2m[i] ?? 0,
+  }))
+}
+
+const CURRENT_PARAMS = 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m'
+const DAILY_PARAMS = 'temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset'
+const HOURLY_PARAMS = 'temperature_2m,weather_code,precipitation,relative_humidity_2m'
 
 export const openmeteoProvider: WeatherProvider = {
   name: 'Open-Meteo',
 
   async getCurrentWeather(city: string) {
     const geo = await geocode(city)
-    const url = `${WEATHER_URL}?latitude=${geo.latitude}&longitude=${geo.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`
+    const url = `${WEATHER_URL}?latitude=${geo.latitude}&longitude=${geo.longitude}&current=${CURRENT_PARAMS}&timezone=auto`
     const res = await fetch(url)
     if (!res.ok) throw new Error('天气服务不可用')
     const data = await res.json()
@@ -126,7 +143,7 @@ export const openmeteoProvider: WeatherProvider = {
   async getCurrentWeatherByCoords(lat: number, lon: number) {
     const [geo, data] = await Promise.all([
       reverseGeocode(lat, lon),
-      fetch(`${WEATHER_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`).then((r) => {
+      fetch(`${WEATHER_URL}?latitude=${lat}&longitude=${lon}&current=${CURRENT_PARAMS}&timezone=auto`).then((r) => {
         if (!r.ok) throw new Error('天气服务不可用')
         return r.json()
       }),
@@ -136,7 +153,7 @@ export const openmeteoProvider: WeatherProvider = {
 
   async getForecast(city: string) {
     const geo = await geocode(city)
-    const url = `${WEATHER_URL}?latitude=${geo.latitude}&longitude=${geo.longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=5`
+    const url = `${WEATHER_URL}?latitude=${geo.latitude}&longitude=${geo.longitude}&daily=${DAILY_PARAMS}&timezone=auto&forecast_days=5`
     const res = await fetch(url)
     if (!res.ok) throw new Error('天气服务不可用')
     const data = await res.json()
@@ -144,10 +161,27 @@ export const openmeteoProvider: WeatherProvider = {
   },
 
   async getForecastByCoords(lat: number, lon: number) {
-    const url = `${WEATHER_URL}?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=5`
+    const url = `${WEATHER_URL}?latitude=${lat}&longitude=${lon}&daily=${DAILY_PARAMS}&timezone=auto&forecast_days=5`
     const res = await fetch(url)
     if (!res.ok) throw new Error('天气服务不可用')
     const data = await res.json()
     return normalizeForecast(data.daily)
+  },
+
+  async getHourlyForecast(city: string) {
+    const geo = await geocode(city)
+    const url = `${WEATHER_URL}?latitude=${geo.latitude}&longitude=${geo.longitude}&hourly=${HOURLY_PARAMS}&timezone=auto&forecast_hours=24`
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('天气服务不可用')
+    const data = await res.json()
+    return normalizeHourly(data.hourly)
+  },
+
+  async getHourlyForecastByCoords(lat: number, lon: number) {
+    const url = `${WEATHER_URL}?latitude=${lat}&longitude=${lon}&hourly=${HOURLY_PARAMS}&timezone=auto&forecast_hours=24`
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('天气服务不可用')
+    const data = await res.json()
+    return normalizeHourly(data.hourly)
   },
 }

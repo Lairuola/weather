@@ -105,4 +105,30 @@ export const openweathermapProvider: WeatherProvider = {
     const data = await handleResponse(await fetch(url), `${lat},${lon}`)
     return normalizeForecast(data.list)
   },
+
+  async getHourlyForecast(city: string) {
+    const key = getApiKey()
+    const url = `${BASE_URL}/forecast?q=${encodeURIComponent(city)}&appid=${key}&units=metric&lang=zh_cn`
+    const data = await handleResponse(await fetch(url), city)
+    return data.list.slice(0, 8).map((item: any) => ({
+      time: item.dt_txt,
+      temperature: Math.round(item.main.temp),
+      iconCode: owmToWeatherCode(item.weather?.[0]?.icon ?? '03d'),
+      precipitation: Math.round((item.pop ?? 0) * 100),
+      humidity: item.main.humidity,
+    }))
+  },
+
+  async getHourlyForecastByCoords(lat: number, lon: number) {
+    const key = getApiKey()
+    const url = `${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=zh_cn`
+    const data = await handleResponse(await fetch(url), `${lat},${lon}`)
+    return data.list.slice(0, 8).map((item: any) => ({
+      time: item.dt_txt,
+      temperature: Math.round(item.main.temp),
+      iconCode: owmToWeatherCode(item.weather?.[0]?.icon ?? '03d'),
+      precipitation: Math.round((item.pop ?? 0) * 100),
+      humidity: item.main.humidity,
+    }))
+  },
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import type { HourlyForecast } from '../api/types'
 import { provider } from '../api/provider'
 import { useWeatherStore } from '../store/weatherStore'
 
@@ -16,14 +17,16 @@ export function useWeather() {
   const doFetch = useCallback(async (trimmed: string, controller: AbortController) => {
     try {
       const signal = controller.signal
-      const [weather, forecast] = await Promise.all([
+      const [weather, forecast, hourly] = await Promise.all([
         provider.getCurrentWeather(trimmed),
         provider.getForecast(trimmed),
+        provider.getHourlyForecast(trimmed).catch(() => [] as HourlyForecast[]),
       ])
       if (signal.aborted) return
       const s = useWeatherStore.getState()
       s.setCurrentSuccess(weather)
       s.setForecastSuccess(forecast)
+      s.setHourly(hourly as HourlyForecast[])
       s.addRecentSearch(trimmed)
     } catch (err) {
       if (controller.signal.aborted) return

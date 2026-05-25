@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Weather } from '../../api/types'
 import { WEATHER_CODE_MAP } from '../../api/types'
 import { useWeatherStore } from '../../store/weatherStore'
-import { formatTemp } from '../../utils/format'
+import { formatTemp, formatWindDir } from '../../utils/format'
 
 interface WeatherCardProps {
   weather: Weather
@@ -93,8 +93,17 @@ export function WeatherCard({ weather, onClose }: WeatherCardProps) {
 
       {/* Details */}
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <Detail label="湿度" value={weather.humidity > 0 ? `${weather.humidity}%` : 'N/A'} index={0} />
-        <Detail label="风速" value={`${weather.windSpeed} m/s`} index={1} />
+        <Detail label="体感" value={formatTemp(weather.feelsLike, unit)} index={0} />
+        <Detail label="湿度" value={weather.humidity > 0 ? `${weather.humidity}%` : 'N/A'} index={1} />
+        <Detail
+          label="风速"
+          value={weather.windDirection != null
+            ? `${weather.windSpeed} m/s ${formatWindDir(weather.windDirection)}`
+            : `${weather.windSpeed} m/s`
+          }
+          index={2}
+        />
+        <Detail label="气压" value="N/A" index={3} />
       </div>
     </motion.div>
   )

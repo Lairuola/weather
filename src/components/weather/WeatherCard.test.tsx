@@ -42,7 +42,8 @@ describe('WeatherCard', () => {
   it('shows N/A for zero humidity', () => {
     const noHumidity = { ...mockWeather, humidity: 0 }
     render(<WeatherCard weather={noHumidity} />)
-    expect(screen.getByText('N/A')).toBeDefined()
+    const naEls = screen.getAllByText('N/A')
+    expect(naEls.length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows filled star when city is favorite', () => {

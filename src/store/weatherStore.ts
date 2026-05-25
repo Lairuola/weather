@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ForecastDay, Weather } from '../api/types'
+import type { ForecastDay, HourlyForecast, Weather } from '../api/types'
 
 interface WeatherStatus {
   status: 'idle' | 'loading' | 'success' | 'error'
@@ -17,6 +17,7 @@ interface ForecastStatus {
 interface AppStore {
   current: WeatherStatus
   forecast: ForecastStatus
+  hourly: { data: HourlyForecast[] | null }
   favorites: string[]
   recentSearches: string[]
   lastSearchedCity: string | null
@@ -30,6 +31,7 @@ interface AppStore {
   setForecastLoading: () => void
   setForecastSuccess: (data: ForecastDay[]) => void
   setForecastError: (error: string) => void
+  setHourly: (data: HourlyForecast[]) => void
   resetToIdle: () => void
   setGeoDenied: (denied: boolean) => void
   addFavorite: (city: string) => void
@@ -45,6 +47,7 @@ export const useWeatherStore = create<AppStore>()(
     (set) => ({
       current: { status: 'idle', data: null, error: null },
       forecast: { status: 'idle', data: null, error: null },
+      hourly: { data: null },
       favorites: [],
       recentSearches: [],
       lastSearchedCity: null,
@@ -58,9 +61,11 @@ export const useWeatherStore = create<AppStore>()(
       setForecastLoading: () => set({ forecast: { status: 'loading', data: null, error: null } }),
       setForecastSuccess: (data) => set({ forecast: { status: 'success', data, error: null } }),
       setForecastError: (error) => set({ forecast: { status: 'error', data: null, error } }),
+      setHourly: (data) => set({ hourly: { data } }),
       resetToIdle: () => set({
         current: { status: 'idle' as const, data: null, error: null },
         forecast: { status: 'idle' as const, data: null, error: null },
+        hourly: { data: null },
       }),
       setGeoDenied: (denied) => set({ geoDenied: denied }),
 

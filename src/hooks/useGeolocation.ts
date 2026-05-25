@@ -39,13 +39,15 @@ export function useGeolocation() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const [weather, forecast] = await Promise.all([
+          const [weather, forecast, hourly] = await Promise.all([
             provider.getCurrentWeatherByCoords(pos.coords.latitude, pos.coords.longitude),
             provider.getForecastByCoords(pos.coords.latitude, pos.coords.longitude),
+            provider.getHourlyForecastByCoords(pos.coords.latitude, pos.coords.longitude).catch(() => []),
           ])
           const s = useWeatherStore.getState()
           s.setCurrentSuccess(weather)
           s.setForecastSuccess(forecast)
+          s.setHourly(hourly)
           s.addRecentSearch(weather.cityName)
         } catch (err) {
           const s2 = useWeatherStore.getState()

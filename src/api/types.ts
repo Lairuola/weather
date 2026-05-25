@@ -35,6 +35,9 @@ export interface Weather {
   iconCode: WeatherCode
   humidity: number          // %
   windSpeed: number         // m/s
+  windDirection?: number    // 风向角度 0-360
+  sunrise?: string          // 日出时间 ISO
+  sunset?: string           // 日落时间 ISO
 }
 
 // 单日预报
@@ -45,6 +48,17 @@ export interface ForecastDay {
   description: string
   iconCode: WeatherCode
   humidity: number
+  sunrise?: string
+  sunset?: string
+}
+
+// 逐小时预报
+export interface HourlyForecast {
+  time: string              // ISO datetime
+  temperature: number
+  iconCode: WeatherCode
+  precipitation: number     // mm
+  humidity: number
 }
 
 // API Provider 接口——两个适配器实现此接口
@@ -54,4 +68,6 @@ export interface WeatherProvider {
   getCurrentWeatherByCoords(lat: number, lon: number): Promise<Weather>
   getForecast(city: string): Promise<ForecastDay[]>
   getForecastByCoords(lat: number, lon: number): Promise<ForecastDay[]>
+  getHourlyForecast(city: string): Promise<HourlyForecast[]>
+  getHourlyForecastByCoords(lat: number, lon: number): Promise<HourlyForecast[]>
 }
