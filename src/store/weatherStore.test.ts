@@ -97,6 +97,13 @@ describe('weatherStore', () => {
     })
   })
 
+  describe('wind unit', () => {
+    it('toggles wind unit', () => {
+      useWeatherStore.getState().setWindUnit('kmh')
+      expect(useWeatherStore.getState().windUnit).toBe('kmh')
+    })
+  })
+
   describe('preferences', () => {
     it('toggles unit', () => {
       useWeatherStore.getState().setUnit('fahrenheit')
@@ -106,6 +113,41 @@ describe('weatherStore', () => {
     it('cycles theme', () => {
       useWeatherStore.getState().setTheme('dark')
       expect(useWeatherStore.getState().theme).toBe('dark')
+    })
+  })
+
+  describe('weather cache', () => {
+    const mockWeather = { cityName: '北京', country: 'CN', temperature: 25, feelsLike: 24, description: '晴', iconCode: 0 as Weather['iconCode'], humidity: 55, windSpeed: 3.2 }
+    const mockForecast = [{ date: '2026-05-25', tempHigh: 28, tempLow: 18, description: '晴', iconCode: 0 as Weather['iconCode'], humidity: 0 }]
+
+    it('saveToCache stores data with timestamp', () => {
+      useWeatherStore.getState().saveToCache(mockWeather, mockForecast, [])
+      const cache = useWeatherStore.getState().weatherCache
+      expect(cache).not.toBeNull()
+      expect(cache?.current.cityName).toBe('北京')
+      expect(cache?.forecast).toHaveLength(1)
+      expect(cache?.fetchedAt).toBeGreaterThan(Date.now() - 1000)
+    })
+
+    it('restoreFromCache returns true for fresh cache (same hour)', () => {
+      useWeatherStore.getState().saveToCache(mockWeather, mockForecast, [])
+      const result = useWeatherStore.getState().restoreFromCache()
+      expect(result).toBe(true)
+      expect(useWeatherStore.getState().current.status).toBe('success')
+      expect(useWeatherStore.getState().current.data?.cityName).toBe('北京')
+    })
+
+    it('restoreFromCache returns false for stale cache', () => {
+      useWeatherStore.setState({
+        weatherCache: { fetchedAt: Date.now() - 3600000, current: mockWeather, forecast: mockForecast, hourly: [] },
+      })
+      const result = useWeatherStore.getState().restoreFromCache()
+      expect(result).toBe(false)
+    })
+
+    it('restoreFromCache returns false when no cache', () => {
+      useWeatherStore.setState({ weatherCache: null })
+      expect(useWeatherStore.getState().restoreFromCache()).toBe(false)
     })
   })
 })

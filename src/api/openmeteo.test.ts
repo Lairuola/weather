@@ -80,4 +80,26 @@ describe('openmeteoProvider', () => {
     expect(weather.cityName).toBe('北京')
     expect(weather.country).toBe('中国')
   })
+
+  it('getCurrentWeatherByCoords falls back to "当前位置" when reverse geocode fails', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockWeatherResponse) }),
+    )
+
+    const weather = await openmeteoProvider.getCurrentWeatherByCoords(20.06, 110.35)
+    expect(weather.cityName).toBe('当前位置')
+    expect(weather.country).toBe('')
+    expect(weather.temperature).toBe(25)
+  })
+
+  it('getCurrentWeatherByCoords falls back when Nominatim returns empty address', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ address: {} }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockWeatherResponse) }),
+    )
+
+    const weather = await openmeteoProvider.getCurrentWeatherByCoords(20.06, 110.35)
+    expect(weather.cityName).toBe('当前位置')
+  })
 })
