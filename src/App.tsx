@@ -36,11 +36,21 @@ export default function App() {
   const { fetchWeather, retry } = useWeather()
   const { locate } = useGeolocation()
 
-  // 自动恢复：同小时内用缓存免请求，过期则重新拉取
+  // 自动恢复：优先显示缓存（即使过期），后台拉取新数据
   useEffect(() => {
-    const restored = useWeatherStore.getState().restoreFromCache()
-    if (!restored && lastSearchedCity) {
-      fetchWeather(lastSearchedCity)
+    const store = useWeatherStore.getState()
+    const cache = store.weatherCache
+    const restored = store.restoreFromCache() // 同小时内直接恢复
+    if (!restored) {
+      // 缓存过期但有数据——先展示旧数据，后台静默刷新
+      if (cache && lastSearchedCity) {
+        store.setCurrentSuccess(cache.current)
+        store.setForecastSuccess(cache.forecast)
+        store.setHourly(cache.hourly)
+        setTimeout(() => fetchWeather(lastSearchedCity), 100)
+      } else if (lastSearchedCity) {
+        fetchWeather(lastSearchedCity)
+      }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
