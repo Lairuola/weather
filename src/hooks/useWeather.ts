@@ -27,6 +27,7 @@ export function useWeather() {
       s.setCurrentSuccess(weather)
       s.setForecastSuccess(forecast)
       s.setHourly(hourly as HourlyForecast[])
+      s.saveToCache(weather, forecast, hourly as HourlyForecast[])
       s.addRecentSearch(trimmed)
     } catch (err) {
       if (controller.signal.aborted) return

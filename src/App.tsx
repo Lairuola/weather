@@ -23,8 +23,10 @@ export default function App() {
   const { fetchWeather, retry } = useWeather()
   const { locate } = useGeolocation()
 
+  // 自动恢复：同小时内用缓存免请求，过期则重新拉取
   useEffect(() => {
-    if (lastSearchedCity) {
+    const restored = useWeatherStore.getState().restoreFromCache()
+    if (!restored && lastSearchedCity) {
       fetchWeather(lastSearchedCity)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps

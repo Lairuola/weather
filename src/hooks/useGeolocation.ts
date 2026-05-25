@@ -48,6 +48,7 @@ export function useGeolocation() {
           s.setCurrentSuccess(weather)
           s.setForecastSuccess(forecast)
           s.setHourly(hourly)
+          s.saveToCache(weather, forecast, hourly)
           s.addRecentSearch(weather.cityName)
         } catch (err) {
           const s2 = useWeatherStore.getState()

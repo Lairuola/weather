@@ -2,6 +2,22 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { ForecastDay, HourlyForecast, Weather } from '../api/types'
 
+interface WeatherCache {
+  fetchedAt: number
+  current: Weather
+  forecast: ForecastDay[]
+  hourly: HourlyForecast[]
+}
+
+function isSameHour(ts: number): boolean {
+  const then = new Date(ts)
+  const now = new Date()
+  return then.getFullYear() === now.getFullYear()
+    && then.getMonth() === now.getMonth()
+    && then.getDate() === now.getDate()
+    && then.getHours() === now.getHours()
+}
+
 interface WeatherStatus {
   status: 'idle' | 'loading' | 'success' | 'error'
   data: Weather | null
@@ -18,6 +34,7 @@ interface AppStore {
   current: WeatherStatus
   forecast: ForecastStatus
   hourly: { data: HourlyForecast[] | null }
+  weatherCache: WeatherCache | null
   favorites: string[]
   recentSearches: string[]
   lastSearchedCity: string | null
@@ -32,6 +49,8 @@ interface AppStore {
   setForecastSuccess: (data: ForecastDay[]) => void
   setForecastError: (error: string) => void
   setHourly: (data: HourlyForecast[]) => void
+  saveToCache: (current: Weather, forecast: ForecastDay[], hourly: HourlyForecast[]) => void
+  restoreFromCache: () => boolean
   resetToIdle: () => void
   setGeoDenied: (denied: boolean) => void
   addFavorite: (city: string) => void
@@ -48,6 +67,7 @@ export const useWeatherStore = create<AppStore>()(
       current: { status: 'idle', data: null, error: null },
       forecast: { status: 'idle', data: null, error: null },
       hourly: { data: null },
+      weatherCache: null,
       favorites: [],
       recentSearches: [],
       lastSearchedCity: null,
@@ -62,6 +82,19 @@ export const useWeatherStore = create<AppStore>()(
       setForecastSuccess: (data) => set({ forecast: { status: 'success', data, error: null } }),
       setForecastError: (error) => set({ forecast: { status: 'error', data: null, error } }),
       setHourly: (data) => set({ hourly: { data } }),
+      saveToCache: (current, forecast, hourly) => set({
+        weatherCache: { fetchedAt: Date.now(), current, forecast, hourly },
+      }),
+      restoreFromCache: () => {
+        const cache = useWeatherStore.getState().weatherCache
+        if (!cache || !isSameHour(cache.fetchedAt)) return false
+        set({
+          current: { status: 'success' as const, data: cache.current, error: null },
+          forecast: { status: 'success' as const, data: cache.forecast, error: null },
+          hourly: { data: cache.hourly },
+        })
+        return true
+      },
       resetToIdle: () => set({
         current: { status: 'idle' as const, data: null, error: null },
         forecast: { status: 'idle' as const, data: null, error: null },
@@ -92,6 +125,7 @@ export const useWeatherStore = create<AppStore>()(
         favorites: state.favorites,
         recentSearches: state.recentSearches,
         lastSearchedCity: state.lastSearchedCity,
+        weatherCache: state.weatherCache,
         unit: state.unit,
         theme: state.theme,
       }),
