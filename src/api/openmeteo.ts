@@ -98,6 +98,9 @@ function normalizeCurrent(geo: GeocodingResult, current: any): Weather {
     humidity: current.relative_humidity_2m ?? 0,
     windSpeed: Math.round((current.wind_speed_10m ?? 0) * 10) / 10,
     windDirection: current.wind_direction_10m ?? undefined,
+    pressure: current.surface_pressure
+      ? Math.round(current.surface_pressure)
+      : undefined,
   }
 }
 
@@ -124,7 +127,7 @@ function normalizeHourly(hourly: any) {
   }))
 }
 
-const CURRENT_PARAMS = 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m'
+const CURRENT_PARAMS = 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure'
 const DAILY_PARAMS = 'temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset'
 const HOURLY_PARAMS = 'temperature_2m,weather_code,precipitation,relative_humidity_2m'
 

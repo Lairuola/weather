@@ -36,6 +36,7 @@ export interface Weather {
   humidity: number          // %
   windSpeed: number         // m/s
   windDirection?: number    // 风向角度 0-360
+  pressure?: number         // 气压 hPa
   sunrise?: string          // 日出时间 ISO
   sunset?: string           // 日落时间 ISO
 }

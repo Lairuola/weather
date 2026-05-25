@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import type { Weather } from '../../api/types'
 import { WEATHER_CODE_MAP } from '../../api/types'
 import { useWeatherStore } from '../../store/weatherStore'
-import { formatTemp, formatWindDir } from '../../utils/format'
+import { formatTemp, formatWind, formatWindDir } from '../../utils/format'
 
 interface WeatherCardProps {
   weather: Weather
@@ -12,6 +12,7 @@ interface WeatherCardProps {
 
 export function WeatherCard({ weather, onClose, onRefresh }: WeatherCardProps) {
   const unit = useWeatherStore((s) => s.unit)
+  const windUnit = useWeatherStore((s) => s.windUnit)
   const meta = WEATHER_CODE_MAP[weather.iconCode]
   const gradient = meta?.gradient ?? 'from-gray-400 to-gray-500'
   const isFavorite = useWeatherStore((s) => s.favorites.includes(weather.cityName))
@@ -109,12 +110,16 @@ export function WeatherCard({ weather, onClose, onRefresh }: WeatherCardProps) {
         <Detail
           label="风速"
           value={weather.windDirection != null
-            ? `${weather.windSpeed} m/s ${formatWindDir(weather.windDirection)}`
-            : `${weather.windSpeed} m/s`
+            ? `${formatWind(weather.windSpeed, windUnit)} ${formatWindDir(weather.windDirection)}`
+            : formatWind(weather.windSpeed, windUnit)
           }
           index={2}
         />
-        <Detail label="气压" value="N/A" index={3} />
+        <Detail
+          label="气压"
+          value={weather.pressure != null ? `${weather.pressure} hPa` : 'N/A'}
+          index={3}
+        />
       </div>
     </motion.div>
   )

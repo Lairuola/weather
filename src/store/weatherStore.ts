@@ -39,6 +39,7 @@ interface AppStore {
   recentSearches: string[]
   lastSearchedCity: string | null
   unit: 'celsius' | 'fahrenheit'
+  windUnit: 'ms' | 'kmh'
   theme: 'light' | 'dark' | 'system'
   geoDenied: boolean
 
@@ -58,6 +59,7 @@ interface AppStore {
   addRecentSearch: (city: string) => void
   removeRecentSearch: (city: string) => void
   setUnit: (unit: 'celsius' | 'fahrenheit') => void
+  setWindUnit: (unit: 'ms' | 'kmh') => void
   setTheme: (theme: 'light' | 'dark' | 'system') => void
 }
 
@@ -72,6 +74,7 @@ export const useWeatherStore = create<AppStore>()(
       recentSearches: [],
       lastSearchedCity: null,
       unit: 'celsius',
+      windUnit: 'ms' as const,
       theme: 'system',
       geoDenied: false,
 
@@ -117,6 +120,7 @@ export const useWeatherStore = create<AppStore>()(
       })),
 
       setUnit: (unit) => set({ unit }),
+      setWindUnit: (windUnit) => set({ windUnit }),
       setTheme: (theme) => set({ theme }),
     }),
     {
@@ -127,6 +131,7 @@ export const useWeatherStore = create<AppStore>()(
         lastSearchedCity: state.lastSearchedCity,
         weatherCache: state.weatherCache,
         unit: state.unit,
+        windUnit: state.windUnit,
         theme: state.theme,
       }),
     },

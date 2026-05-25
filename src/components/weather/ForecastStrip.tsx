@@ -6,6 +6,8 @@ import { formatTemp, formatTime } from '../../utils/format'
 
 interface ForecastStripProps {
   forecast: ForecastDay[]
+  selectedDay?: string | null
+  onDayClick?: (date: string) => void
 }
 
 const container = {
@@ -20,7 +22,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const } },
 }
 
-export function ForecastStrip({ forecast }: ForecastStripProps) {
+export function ForecastStrip({ forecast, selectedDay, onDayClick }: ForecastStripProps) {
   const unit = useWeatherStore((s) => s.unit)
 
   if (forecast.length === 0) {
@@ -29,7 +31,10 @@ export function ForecastStrip({ forecast }: ForecastStripProps) {
 
   return (
     <div className="mt-6 px-4">
-      <h3 className="mb-3 text-sm font-medium tracking-wide text-white/60 uppercase">5 天预报</h3>
+      <h3 className="mb-3 text-sm font-medium tracking-wide text-white/60 uppercase">
+        5 天预报
+        {onDayClick && <span className="ml-1 font-normal text-white/30">· 点击展开逐小时</span>}
+      </h3>
       <motion.div
         variants={container}
         initial="hidden"
@@ -39,12 +44,19 @@ export function ForecastStrip({ forecast }: ForecastStripProps) {
         {forecast.map((day) => {
           const meta = WEATHER_CODE_MAP[day.iconCode]
           const dayName = new Date(day.date).toLocaleDateString('zh-CN', { weekday: 'short' })
+          const isSelected = selectedDay === day.date
           return (
-            <motion.div
+            <motion.button
+              type="button"
               key={day.date}
               variants={item}
               whileHover={{ scale: 1.06, transition: { duration: 0.2 } }}
-              className="flex min-w-[90px] flex-col items-center rounded-2xl bg-white/20 dark:bg-slate-800/30 backdrop-blur-xl border border-white/30 dark:border-slate-700/50 px-3 py-3"
+              onClick={() => onDayClick?.(day.date)}
+              className={`flex min-w-[90px] flex-col items-center rounded-2xl backdrop-blur-xl border px-3 py-3 transition-colors ${
+                isSelected
+                  ? 'bg-white/30 dark:bg-slate-700/40 border-white/50'
+                  : 'bg-white/20 dark:bg-slate-800/30 border-white/30 dark:border-slate-700/50'
+              }`}
             >
               <span className="text-xs text-white/60">{dayName}</span>
               <span className="mt-1 text-2xl">{meta?.emoji ?? '🌤️'}</span>
@@ -56,7 +68,7 @@ export function ForecastStrip({ forecast }: ForecastStripProps) {
                   <span>↓{formatTime(day.sunset)}</span>
                 </div>
               )}
-            </motion.div>
+            </motion.button>
           )
         })}
       </motion.div>

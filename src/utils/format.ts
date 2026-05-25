@@ -7,7 +7,10 @@ export function formatTemp(celsius: number, unit: 'celsius' | 'fahrenheit'): str
 }
 
 // 风速格式化
-export function formatWind(speedMs: number): string {
+export function formatWind(speedMs: number, unit: 'ms' | 'kmh' = 'ms'): string {
+  if (unit === 'kmh') {
+    return `${Math.round(speedMs * 3.6)} km/h`
+  }
   return `${speedMs} m/s`
 }
 

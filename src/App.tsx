@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { AppShell } from './components/layout/AppShell'
 import { Loader } from './components/ui/Loader'
@@ -18,6 +18,12 @@ export default function App() {
   const lastSearchedCity = useWeatherStore((s) => s.lastSearchedCity)
   const recentSearches = useWeatherStore((s) => s.recentSearches)
   const hourly = useWeatherStore((s) => s.hourly)
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+
+  const dayHourly = useMemo(() => {
+    if (!selectedDay || !hourly.data) return null
+    return hourly.data.filter((h) => h.time.startsWith(selectedDay))
+  }, [selectedDay, hourly.data])
 
   const removeRecentSearch = useWeatherStore((s) => s.removeRecentSearch)
   const { fetchWeather, retry } = useWeather()
@@ -109,11 +115,17 @@ export default function App() {
         <>
           <WeatherCard weather={current.data} onRefresh={handleRefresh} onClose={handleClear} />
           {forecast.status === 'success' && forecast.data && (
-            <ForecastStrip forecast={forecast.data} />
+            <ForecastStrip
+              forecast={forecast.data}
+              selectedDay={selectedDay}
+              onDayClick={(date) => setSelectedDay(selectedDay === date ? null : date)}
+            />
           )}
-          {hourly.data && hourly.data.length > 0 && (
+          {dayHourly ? (
+            <HourlyForecast hourly={dayHourly} />
+          ) : hourly.data && hourly.data.length > 0 ? (
             <HourlyForecast hourly={hourly.data} />
-          )}
+          ) : null}
           {forecast.status === 'error' && forecast.error && (
             <div className="px-4 pt-2">
               <ErrorBanner message={forecast.error} />
