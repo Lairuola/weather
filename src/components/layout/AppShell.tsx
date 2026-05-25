@@ -31,41 +31,36 @@ function useClock() {
 export function AppShell({ children, weather }: AppShellProps) {
   const now = useClock()
   const greeting = getGreeting()
-  const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })
+  const dateStr = now.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
   const weekStr = now.toLocaleDateString('zh-CN', { weekday: 'short' })
   const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
 
   return (
     <div className="relative min-h-svh bg-gradient-to-b from-sky-700 via-sky-500 to-sky-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700 transition-colors">
-      <header className="px-4 pt-4">
-        <div className="flex items-start justify-between">
-          {/* Left: greeting + date */}
-          <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-medium text-white/90">
-              {greeting}
-              <span className="ml-1.5 text-white/50 font-normal">{dateStr} {weekStr}</span>
-            </h1>
-            <p className="mt-0.5 text-sm text-white/50 tabular-nums">{timeStr}</p>
-          </div>
-
-          {/* Right: weather summary or brand */}
-          <div className="flex items-center gap-2 ml-3 shrink-0">
-            {weather ? (
-              <div className="flex items-center gap-1.5 text-white">
-                <span className="text-xl">{WEATHER_CODE_MAP[weather.iconCode]?.emoji}</span>
-                <span className="text-sm font-medium">{weather.cityName}</span>
-                <span className="text-lg font-light">{weather.temperature}°</span>
-              </div>
-            ) : (
-              <span className="text-sm font-medium text-white/60">天气查询</span>
-            )}
-          </div>
+      <header className="flex items-center gap-3 px-4 pt-4 pb-1">
+        {/* Left: greeting + date + time */}
+        <div className="flex items-baseline gap-2 min-w-0 flex-1">
+          <h1 className="text-lg font-medium text-white truncate">{greeting}</h1>
+          <span className="text-sm text-white/50 shrink-0 tabular-nums">
+            {dateStr} {weekStr} {timeStr}
+          </span>
         </div>
 
-        {/* Toggles row */}
-        <div className="mt-2 flex items-center gap-1">
-          <UnitToggle />
-          <ThemeToggle />
+        {/* Right: weather summary or brand + toggles */}
+        <div className="flex items-center gap-2 shrink-0">
+          {weather ? (
+            <div className="flex items-center gap-1.5 text-white">
+              <span className="text-lg">{WEATHER_CODE_MAP[weather.iconCode]?.emoji}</span>
+              <span className="text-sm font-medium">{weather.cityName}</span>
+              <span className="text-base font-light">{weather.temperature}°</span>
+            </div>
+          ) : (
+            <span className="text-sm font-medium text-white/50">天气查询</span>
+          )}
+          <div className="flex items-center gap-0.5 border-l border-white/15 pl-1.5 ml-0.5">
+            <UnitToggle />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
