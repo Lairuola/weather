@@ -35,6 +35,7 @@ interface AppStore {
   addFavorite: (city: string) => void
   removeFavorite: (city: string) => void
   addRecentSearch: (city: string) => void
+  removeRecentSearch: (city: string) => void
   setUnit: (unit: 'celsius' | 'fahrenheit') => void
   setTheme: (theme: 'light' | 'dark' | 'system') => void
 }
@@ -72,6 +73,9 @@ export const useWeatherStore = create<AppStore>()(
       addRecentSearch: (city) => set((s) => ({
         recentSearches: [city, ...s.recentSearches.filter((c) => c !== city)].slice(0, 5),
         lastSearchedCity: city,
+      })),
+      removeRecentSearch: (city) => set((s) => ({
+        recentSearches: s.recentSearches.filter((c) => c !== city),
       })),
 
       setUnit: (unit) => set({ unit }),

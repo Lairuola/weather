@@ -45,9 +45,10 @@ describe('openmeteoProvider', () => {
     expect(weather.description).toBe('晴')
   })
 
-  it('throws friendly error for unknown city', async () => {
+  it('throws friendly error for unknown city (both APIs fail)', async () => {
     vi.stubGlobal('fetch', vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ results: [] }) }),
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ results: [] }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([]) }),
     )
 
     await expect(openmeteoProvider.getCurrentWeather('NotACity')).rejects.toThrow('找不到「NotACity」，请检查拼写')

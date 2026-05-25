@@ -68,6 +68,13 @@ describe('weatherStore', () => {
       expect(useWeatherStore.getState().lastSearchedCity).toBe('北京')
     })
 
+    it('removes a recent search', () => {
+      useWeatherStore.getState().addRecentSearch('北京')
+      useWeatherStore.getState().addRecentSearch('上海')
+      useWeatherStore.getState().removeRecentSearch('北京')
+      expect(useWeatherStore.getState().recentSearches).toEqual(['上海'])
+    })
+
     it('deduplicates and keeps max 5', () => {
       for (const city of ['a', 'b', 'c', 'd', 'e', 'f']) {
         useWeatherStore.getState().addRecentSearch(city)

@@ -57,20 +57,33 @@ async function reverseGeocode(lat: number, lon: number): Promise<ReverseGeoResul
 }
 
 async function geocode(city: string): Promise<GeocodingResult> {
+  // 先用 Open-Meteo Geocoding API
   const url = `${GEOCODING_URL}?name=${encodeURIComponent(city)}&count=1&language=zh`
   const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error(res.status === 404 ? `找不到「${city}」，请检查拼写` : '天气服务不可用')
+  if (res.ok) {
+    const data = await res.json()
+    if (data.results && data.results.length > 0) {
+      return {
+        name: data.results[0].name,
+        country: data.results[0].country ?? '',
+        latitude: data.results[0].latitude,
+        longitude: data.results[0].longitude,
+      }
+    }
   }
-  const data = await res.json()
-  if (!data.results || data.results.length === 0) {
+  // 兜底：Nominatim（支持区/镇/村级地名）
+  const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&accept-language=zh`
+  const nomRes = await fetch(nomUrl)
+  if (!nomRes.ok) throw new Error('天气服务不可用')
+  const nomData = await nomRes.json()
+  if (!nomData || nomData.length === 0) {
     throw new Error(`找不到「${city}」，请检查拼写`)
   }
   return {
-    name: data.results[0].name,
-    country: data.results[0].country ?? '',
-    latitude: data.results[0].latitude,
-    longitude: data.results[0].longitude,
+    name: nomData[0].display_name?.split(',')[0] ?? nomData[0].name ?? city,
+    country: '',
+    latitude: Number.parseFloat(nomData[0].lat),
+    longitude: Number.parseFloat(nomData[0].lon),
   }
 }
 

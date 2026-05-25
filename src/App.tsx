@@ -17,6 +17,7 @@ export default function App() {
   const lastSearchedCity = useWeatherStore((s) => s.lastSearchedCity)
   const recentSearches = useWeatherStore((s) => s.recentSearches)
 
+  const removeRecentSearch = useWeatherStore((s) => s.removeRecentSearch)
   const { fetchWeather, retry } = useWeather()
   const { locate } = useGeolocation()
 
@@ -58,18 +59,27 @@ export default function App() {
         {recentSearches.length > 0 && (
           <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {recentSearches.map((city) => (
-              <motion.button
+              <motion.span
                 key={city}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleQuickSelect(city)}
-                disabled={current.status === 'loading'}
-                className="shrink-0 rounded-lg bg-white/10 px-2.5 py-1 text-xs text-white/60 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-30"
+                className="group flex shrink-0 items-center gap-0.5 rounded-lg bg-white/10"
               >
-                {city}
-              </motion.button>
+                <button
+                  onClick={() => handleQuickSelect(city)}
+                  disabled={current.status === 'loading'}
+                  className="px-2 py-1 text-xs text-white/60 hover:text-white transition-colors disabled:opacity-30"
+                >
+                  {city}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); removeRecentSearch(city) }}
+                  className="pr-1.5 text-white/30 hover:text-red-400 transition-colors"
+                  aria-label={`移除 ${city}`}
+                >
+                  ×
+                </button>
+              </motion.span>
             ))}
           </div>
         )}
