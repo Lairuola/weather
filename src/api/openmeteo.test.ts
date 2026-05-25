@@ -6,6 +6,10 @@ const mockGeocodingResponse = {
   results: [{ name: '北京', country: 'China', latitude: 39.9, longitude: 116.4 }],
 }
 
+const mockNominatimResponse = {
+  address: { city: '北京', country: '中国' },
+}
+
 const mockWeatherResponse = {
   current: {
     temperature_2m: 25.3,
@@ -64,12 +68,15 @@ describe('openmeteoProvider', () => {
     expect(forecast[0].iconCode).toBe(WeatherCode.Clear)
   })
 
-  it('getCurrentWeatherByCoords works without geocoding', async () => {
+  it('getCurrentWeatherByCoords works with reverse geocoding', async () => {
     vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockNominatimResponse) })
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(mockWeatherResponse) }),
     )
 
     const weather = await openmeteoProvider.getCurrentWeatherByCoords(39.9, 116.4)
     expect(weather.temperature).toBe(25)
+    expect(weather.cityName).toBe('北京')
+    expect(weather.country).toBe('中国')
   })
 })

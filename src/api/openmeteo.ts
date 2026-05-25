@@ -37,6 +37,25 @@ interface GeocodingResult {
   longitude: number
 }
 
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/reverse'
+
+interface ReverseGeoResult {
+  name: string
+  country: string
+}
+
+async function reverseGeocode(lat: number, lon: number): Promise<ReverseGeoResult> {
+  const url = `${NOMINATIM_URL}?lat=${lat}&lon=${lon}&format=json&accept-language=zh`
+  const res = await fetch(url)
+  if (!res.ok) return { name: `${lat.toFixed(2)}, ${lon.toFixed(2)}`, country: '' }
+  const data = await res.json()
+  const addr = data.address ?? {}
+  return {
+    name: addr.city || addr.town || addr.village || addr.county || addr.state || `${lat.toFixed(2)}, ${lon.toFixed(2)}`,
+    country: addr.country ?? '',
+  }
+}
+
 async function geocode(city: string): Promise<GeocodingResult> {
   const url = `${GEOCODING_URL}?name=${encodeURIComponent(city)}&count=1&language=zh`
   const res = await fetch(url)
@@ -92,20 +111,14 @@ export const openmeteoProvider: WeatherProvider = {
   },
 
   async getCurrentWeatherByCoords(lat: number, lon: number) {
-    const url = `${WEATHER_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('天气服务不可用')
-    const data = await res.json()
-    return {
-      cityName: `${lat.toFixed(2)}, ${lon.toFixed(2)}`,
-      country: '',
-      temperature: Math.round(data.current.temperature_2m),
-      feelsLike: Math.round(data.current.apparent_temperature),
-      description: wmoToDescription(data.current.weather_code),
-      iconCode: wmoToWeatherCode(data.current.weather_code),
-      humidity: data.current.relative_humidity_2m ?? 0,
-      windSpeed: Math.round((data.current.wind_speed_10m ?? 0) * 10) / 10,
-    }
+    const [geo, data] = await Promise.all([
+      reverseGeocode(lat, lon),
+      fetch(`${WEATHER_URL}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`).then((r) => {
+        if (!r.ok) throw new Error('天气服务不可用')
+        return r.json()
+      }),
+    ])
+    return normalizeCurrent({ name: geo.name, country: geo.country, latitude: lat, longitude: lon }, data.current)
   },
 
   async getForecast(city: string) {
