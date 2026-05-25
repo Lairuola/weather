@@ -46,14 +46,16 @@ interface ReverseGeoResult {
 
 async function reverseGeocode(lat: number, lon: number): Promise<ReverseGeoResult> {
   const url = `${NOMINATIM_URL}?lat=${lat}&lon=${lon}&format=json&accept-language=zh`
-  const res = await fetch(url)
-  if (!res.ok) return { name: `${lat.toFixed(2)}, ${lon.toFixed(2)}`, country: '' }
-  const data = await res.json()
-  const addr = data.address ?? {}
-  return {
-    name: addr.city || addr.town || addr.village || addr.county || addr.state || `${lat.toFixed(2)}, ${lon.toFixed(2)}`,
-    country: addr.country ?? '',
-  }
+  try {
+    const res = await fetch(url)
+    if (res.ok) {
+      const data = await res.json()
+      const addr = data.address ?? {}
+      const name = addr.city || addr.town || addr.village || addr.county || addr.state || ''
+      if (name) return { name, country: addr.country ?? '' }
+    }
+  } catch { /* Nominatim 不可用，静默降级 */ }
+  return { name: '当前位置', country: '' }
 }
 
 async function geocode(city: string): Promise<GeocodingResult> {
